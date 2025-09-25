@@ -3,13 +3,13 @@ import Image from "next/image";
 
 export const Logo = () => {
   return (
-    <Link href="/">
-      <div className="size-8 relative shrink-0">
+    <Link href="/main">
+      <div className="size-8 relative shrink-0 rounded-full">
         <Image
-          src="/logo.svg"
+          src="/logo.png"
           fill
-          alt="The Canvas"
-          className="shrink-0 hover:opacity-75 transition"
+          alt="The Reelo"
+          className="shrink-0 hover:opacity-75 transition object-contain rounded-full"
         />
       </div>
     </Link>

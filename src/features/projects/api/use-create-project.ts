@@ -1,18 +1,20 @@
-import { toast } from "sonner";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { InferRequestType, InferResponseType } from "hono";
 
-import { client } from "@/lib/hono";
-
-type ResponseType = InferResponseType<(typeof client.api.projects)["$post"], 200>;
-type RequestType = InferRequestType<(typeof client.api.projects)["$post"]>["json"];
+type RequestType = any; // Replace with your request type if needed
+type ResponseType = any; // Replace with your response type if needed
 
 export const useCreateProject = () => {
   const queryClient = useQueryClient();
 
   const mutation = useMutation<ResponseType, Error, RequestType>({
     mutationFn: async (json) => {
-      const response = await client.api.projects.$post({ json });
+      const response = await fetch("/api/projects", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(json),
+      });
 
       if (!response.ok) {
         throw new Error("Something went wrong");
@@ -21,16 +23,14 @@ export const useCreateProject = () => {
       return await response.json();
     },
     onSuccess: () => {
-      toast.success("Project created.");
-
+      // Remove toast, just refresh project queries
       queryClient.invalidateQueries({ queryKey: ["projects"] });
     },
-    onError: () => {
-      toast.error(
-        "Failed to create project. The session token may have expired, logout and login again, and everything will work fine."
-      );
+    onError: (error) => {
+      console.error("Failed to create project:", error.message);
     },
   });
 
   return mutation;
 };
+

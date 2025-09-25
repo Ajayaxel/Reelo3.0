@@ -12,11 +12,11 @@ export const SidebarRoutes = () => {
   return (
     <div className="flex flex-col gap-y-4 flex-1">
       <ul className="flex flex-col gap-y-1 px-3">
-        <SidebarItem href="/" icon={Home} label="Home" isActive={pathname === "/"} />
+        <SidebarItem href="/main" icon={Home} label="Home" isActive={pathname === "/main"} />
       </ul>
       <ul className="flex flex-col gap-y-1 px-3">
         <SidebarItem
-          href="mailto:support@example.com"
+          href="ajayps8590@gmail.com"
           icon={MessageCircleQuestion}
           label="Get Help"
         />
