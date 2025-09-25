@@ -1,11 +1,4 @@
-import { redirect } from "next/navigation";
-
-import { auth } from "@/auth";
-
+// No-op: server protection disabled, everything is public
 export const protectServer = async () => {
-  const session = await auth();
-
-  if (!session) {
-    redirect("/api/auth/signin");
-  }
+  return;
 };

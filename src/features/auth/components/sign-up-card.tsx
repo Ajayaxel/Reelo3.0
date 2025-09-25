@@ -2,12 +2,11 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { signIn } from "next-auth/react";
 import { FaGithub } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
-import { Loader2, TriangleAlert } from "lucide-react";
+import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
-import { useSignUp } from "@/features/auth/hooks/use-sign-up";
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -19,7 +18,6 @@ export const SignUpCard = () => {
   const [loadingGithub, setLoadingGithub] = useState(false);
   const [loadingGoogle, setLoadingGoogle] = useState(false);
 
-  const mutation = useSignUp();
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -29,30 +27,24 @@ export const SignUpCard = () => {
     setLoading(true);
     setLoadingGithub(provider === "github");
     setLoadingGoogle(provider === "google");
-
-    signIn(provider, { callbackUrl: "/" });
+    // Demo note: Auth is disabled; show info toast
+    toast.info("Sign up with providers is disabled in this demo.");
+    setLoading(false);
+    setLoadingGithub(false);
+    setLoadingGoogle(false);
   };
 
   const onCredentialSignUp = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
-
-    mutation.mutate(
-      {
-        name,
-        email,
-        password,
-      },
-      {
-        onSuccess: () => {
-          signIn("credentials", {
-            email,
-            password,
-            callbackUrl: "/",
-          });
-        },
-      }
-    );
+    // Demo note: Auth is disabled; validate locally and show info toast
+    if (!name || !email || !password) {
+      toast.error("Please fill out all fields.");
+      setLoading(false);
+      return;
+    }
+    toast.success("Account creation is disabled in this demo.");
+    setLoading(false);
   };
 
   return (
@@ -61,16 +53,10 @@ export const SignUpCard = () => {
         <CardTitle>Create an account</CardTitle>
         <CardDescription>Use your email or another service to continue</CardDescription>
       </CardHeader>
-      {!!mutation.error && (
-        <div className="bg-destructive/15 p-3 rounded-md flex items-center gap-x-2 text-sm text-destructive mb-6">
-          <TriangleAlert className="size-4" />
-          <p>Something went wrong</p>
-        </div>
-      )}
       <CardContent className="space-y-5 px-0 pb-0">
         <form onSubmit={onCredentialSignUp} className="space-y-2.5">
           <Input
-            disabled={mutation.isPending || loading}
+            disabled={loading}
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Full name"
@@ -78,7 +64,7 @@ export const SignUpCard = () => {
             required
           />
           <Input
-            disabled={mutation.isPending || loading}
+            disabled={loading}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="Email"
@@ -86,7 +72,7 @@ export const SignUpCard = () => {
             required
           />
           <Input
-            disabled={mutation.isPending || loading}
+            disabled={loading}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Password"
@@ -99,9 +85,9 @@ export const SignUpCard = () => {
             className="w-full"
             type="submit"
             size="lg"
-            disabled={loading || mutation.isPending}
+            disabled={loading}
           >
-            {mutation.isPending ? (
+            {loading ? (
               <Loader2 className="mr-2 size-5 top-2.5 left-2.5 animate-spin" />
             ) : (
               "Continue"
@@ -111,7 +97,7 @@ export const SignUpCard = () => {
         <Separator />
         <div className="flex flex-col gap-y-2.5">
           <Button
-            disabled={mutation.isPending || loading}
+            disabled={loading}
             onClick={() => onProviderSignUp("google")}
             variant="outline"
             size="lg"
@@ -125,7 +111,7 @@ export const SignUpCard = () => {
             Continue with Google
           </Button>
           <Button
-            disabled={mutation.isPending || loading}
+            disabled={loading}
             onClick={() => onProviderSignUp("github")}
             variant="outline"
             size="lg"

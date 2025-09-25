@@ -10,6 +10,23 @@ type RequestType = InferRequestType<typeof client.api.projects[":id"]["$patch"]>
 export const useUpdateProject = (id: string) => {
   const queryClient = useQueryClient();
 
+  // Read-only templates should not be saved; return a no-op mutation
+  if (id?.startsWith("template-")) {
+    return useMutation<ResponseType, Error, RequestType>({
+      mutationKey: ["project", { id }],
+      mutationFn: async () => {
+        // no-op
+        return Promise.resolve({} as unknown as ResponseType);
+      },
+      onSuccess: () => {
+        // no cache updates for read-only
+      },
+      onError: () => {
+        // suppress errors for read-only
+      },
+    });
+  }
+
   const mutation = useMutation<
     ResponseType,
     Error,

@@ -1,14 +1,11 @@
-import Image from "next/image";
-import { AlertTriangle } from "lucide-react";
+"use client";
 
-import { usePaywall } from "@/features/subscriptions/hooks/use-paywall";
+import { useState } from "react";
+import { AlertTriangle } from "lucide-react";
 
 import { ActiveTool, Editor } from "@/features/editor/types";
 import { ToolSidebarClose } from "@/features/editor/components/tool-sidebar-close";
 import { ToolSidebarHeader } from "@/features/editor/components/tool-sidebar-header";
-
-import { useRemoveBg } from "@/features/ai/api/use-remove-bg";
-
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -17,51 +14,69 @@ interface RemoveBgSidebarProps {
   editor: Editor | undefined;
   activeTool: ActiveTool;
   onChangeActiveTool: (tool: ActiveTool) => void;
-};
+}
 
 export const RemoveBgSidebar = ({
   editor,
   activeTool,
   onChangeActiveTool,
 }: RemoveBgSidebarProps) => {
-  const { shouldBlock, triggerPaywall } = usePaywall();
-  const mutation = useRemoveBg();
-
   const selectedObject = editor?.selectedObjects[0];
-
   // @ts-ignore
   const imageSrc = selectedObject?._originalElement?.currentSrc;
+
+  const [processing, setProcessing] = useState(false);
 
   const onClose = () => {
     onChangeActiveTool("select");
   };
 
-  const onClick = () => {
-    if (shouldBlock) {
-      triggerPaywall();
-      return;
-    }
+  const removeBackgroundLocally = async () => {
+    if (!imageSrc) return;
+    setProcessing(true);
 
-    mutation.mutate({
-      image: imageSrc,
-    }, {
-      onSuccess: ({ data }) => {
-        editor?.addImage(data);
-      },
-    });
+    const img = new window.Image();
+    img.crossOrigin = "anonymous";
+    img.src = imageSrc;
+
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return;
+
+      ctx.drawImage(img, 0, 0);
+
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const data = imageData.data;
+
+      // Simple background removal: remove white pixels
+      for (let i = 0; i < data.length; i += 4) {
+        const r = data[i];
+        const g = data[i + 1];
+        const b = data[i + 2];
+
+        if (r > 240 && g > 240 && b > 240) {
+          data[i + 3] = 0; // make transparent
+        }
+      }
+
+      ctx.putImageData(imageData, 0, 0);
+
+      const newImage = canvas.toDataURL("image/png");
+      editor?.addImage(newImage);
+      setProcessing(false);
+    };
   };
 
   return (
-    <aside
-      className={cn(
-        "bg-white relative border-r z-[40] w-[360px] h-full flex flex-col",
-        activeTool === "remove-bg" ? "visible" : "hidden",
-      )}
-    >
+    <aside className="bg-white relative border-r z-[40] w-[360px] h-full flex flex-col">
       <ToolSidebarHeader
         title="Background removal"
-        description="Remove background from image using AI"
+        description="Remove background from image locally"
       />
+
       {!imageSrc && (
         <div className="flex flex-col gap-y-4 items-center justify-center flex-1">
           <AlertTriangle className="size-4 text-muted-foreground" />
@@ -70,31 +85,36 @@ export const RemoveBgSidebar = ({
           </p>
         </div>
       )}
+
       {imageSrc && (
         <ScrollArea>
           <div className="p-4 space-y-4">
-            <div className={cn(
-              "relative aspect-square rounded-md overflow-hidden transition bg-muted",
-              mutation.isPending && "opacity-50",
-            )}>
-              <Image
+            <div
+              className={cn(
+                "relative aspect-square rounded-md overflow-hidden transition bg-muted",
+                processing && "opacity-50"
+              )}
+            >
+              <img
                 src={imageSrc}
-                fill
                 alt="Image"
-                className="object-cover"
+                className="object-cover w-full h-full"
               />
             </div>
             <Button
-              disabled={mutation.isPending}
-              onClick={onClick}
+              disabled={processing}
+              onClick={removeBackgroundLocally}
               className="w-full"
             >
-              Remove background
+              {processing ? "Processing..." : "Remove background"}
             </Button>
           </div>
         </ScrollArea>
       )}
+
       <ToolSidebarClose onClick={onClose} />
     </aside>
   );
 };
+
+

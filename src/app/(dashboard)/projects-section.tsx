@@ -32,6 +32,15 @@ import {
 import { Button } from "@/components/ui/button";
 import { useConfirm } from "@/hooks/use-confirm";
 
+// Define Project type
+interface Project {
+  id: string;
+  name: string;
+  width: number;
+  height: number;
+  updatedAt: string | Date;
+}
+
 export const ProjectsSection = () => {
   const [ConfirmDialog, confirm] = useConfirm(
     "Are you sure?",
@@ -64,22 +73,18 @@ export const ProjectsSection = () => {
   if (status === "pending") {
     return (
       <div className="space-y-4">
-        <h3 className="font-semibold text-lg">
-          Recent projects
-        </h3>
+        <h3 className="font-semibold text-lg">Recent projects</h3>
         <div className="flex flex-col gap-y-4 items-center justify-center h-32">
           <Loader className="size-6 animate-spin text-muted-foreground" />
         </div>
       </div>
-    )
+    );
   }
 
   if (status === "error") {
     return (
       <div className="space-y-4">
-        <h3 className="font-semibold text-lg">
-          Recent projects
-        </h3>
+        <h3 className="font-semibold text-lg">Recent projects</h3>
         <div className="flex flex-col gap-y-4 items-center justify-center h-32">
           <AlertTriangle className="size-6 text-muted-foreground" />
           <p className="text-muted-foreground text-sm">
@@ -87,39 +92,30 @@ export const ProjectsSection = () => {
           </p>
         </div>
       </div>
-    )
+    );
   }
 
-  if (
-    !data.pages.length ||
-    !data.pages[0].data.length
-  ) {
+  if (!data.pages.length || !data.pages[0].data.length) {
     return (
       <div className="space-y-4">
-        <h3 className="font-semibold text-lg">
-          Recent projects
-        </h3>
+        <h3 className="font-semibold text-lg">Recent projects</h3>
         <div className="flex flex-col gap-y-4 items-center justify-center h-32">
           <Search className="size-6 text-muted-foreground" />
-          <p className="text-muted-foreground text-sm">
-            No projects found
-          </p>
+          <p className="text-muted-foreground text-sm">No projects found</p>
         </div>
       </div>
-    )
+    );
   }
 
   return (
-    <div className="space-y-4"> 
+    <div className="space-y-4">
       <ConfirmDialog />
-      <h3 className="font-semibold text-lg">
-        Recent projects
-      </h3>
+      <h3 className="font-semibold text-lg">Recent projects</h3>
       <Table>
         <TableBody>
           {data.pages.map((group, i) => (
             <React.Fragment key={i}>
-              {group.data.map((project) => (
+              {group.data.map((project: Project) => (
                 <TableRow key={project.id}>
                   <TableCell
                     onClick={() => router.push(`/editor/${project.id}`)}
@@ -138,18 +134,14 @@ export const ProjectsSection = () => {
                     onClick={() => router.push(`/editor/${project.id}`)}
                     className="hidden md:table-cell cursor-pointer"
                   >
-                    {formatDistanceToNow(project.updatedAt, {
+                    {formatDistanceToNow(new Date(project.updatedAt), {
                       addSuffix: true,
                     })}
                   </TableCell>
                   <TableCell className="flex items-center justify-end">
                     <DropdownMenu modal={false}>
                       <DropdownMenuTrigger asChild>
-                        <Button
-                          disabled={false}
-                          size="icon"
-                          variant="ghost"
-                        >
+                        <Button size="icon" variant="ghost">
                           <MoreHorizontal className="size-4" />
                         </Button>
                       </DropdownMenuTrigger>
@@ -193,3 +185,4 @@ export const ProjectsSection = () => {
     </div>
   );
 };
+

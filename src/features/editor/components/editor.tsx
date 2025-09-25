@@ -26,16 +26,17 @@ import { FontSidebar } from "@/features/editor/components/font-sidebar";
 import { ImageSidebar } from "@/features/editor/components/image-sidebar";
 import { FilterSidebar } from "@/features/editor/components/filter-sidebar";
 import { DrawSidebar } from "@/features/editor/components/draw-sidebar";
-import { AiSidebar } from "@/features/editor/components/ai-sidebar";
+
 import { TemplateSidebar } from "@/features/editor/components/template-sidebar";
-import { RemoveBgSidebar } from "@/features/editor/components/remove-bg-sidebar";
+
 import { SettingsSidebar } from "@/features/editor/components/settings-sidebar";
 
 interface EditorProps {
   initialData: ResponseType["data"];
+  disableSave?: boolean;
 };
 
-export const Editor = ({ initialData }: EditorProps) => {
+export const Editor = ({ initialData, disableSave = false }: EditorProps) => {
   const { mutate } = useUpdateProject(initialData.id);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -46,10 +47,11 @@ export const Editor = ({ initialData }: EditorProps) => {
         height: number,
         width: number,
       }) => {
+        if (disableSave) return; // no-op when save is disabled
         mutate(values);
     },
     500
-  ), [mutate]);
+  ), [mutate, disableSave]);
 
   const [activeTool, setActiveTool] = useState<ActiveTool>("select");
 
@@ -165,16 +167,12 @@ export const Editor = ({ initialData }: EditorProps) => {
           activeTool={activeTool}
           onChangeActiveTool={onChangeActiveTool}
         />
-        <AiSidebar
+        {/* <RemoveBgSidebar
           editor={editor}
           activeTool={activeTool}
           onChangeActiveTool={onChangeActiveTool}
-        />
-        <RemoveBgSidebar
-          editor={editor}
-          activeTool={activeTool}
-          onChangeActiveTool={onChangeActiveTool}
-        />
+        /> */}
+
         <DrawSidebar
           editor={editor}
           activeTool={activeTool}
