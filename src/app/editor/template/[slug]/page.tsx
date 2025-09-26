@@ -80,7 +80,7 @@ const TemplateEditorPage = () => {
     isPro: false,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
-  } as unknown as import("@/features/projects/api/use-get-project").ResponseType["data"]; // satisfy type
+  } as unknown as NonNullable<import("@/features/projects/api/use-get-project").ResponseType["data"]>; // satisfy type
 
   return <Editor initialData={initialData} disableSave />;
 };

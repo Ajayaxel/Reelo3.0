@@ -32,7 +32,7 @@ import { TemplateSidebar } from "@/features/editor/components/template-sidebar";
 import { SettingsSidebar } from "@/features/editor/components/settings-sidebar";
 
 interface EditorProps {
-  initialData: ResponseType["data"];
+  initialData: NonNullable<ResponseType["data"]>;
   disableSave?: boolean;
 };
 
@@ -114,6 +114,7 @@ export const Editor = ({ initialData, disableSave = false }: EditorProps) => {
       />
       <div className="absolute h-[calc(100%-68px)] w-full top-[68px] flex">
         <Sidebar
+          editor={editor}
           activeTool={activeTool}
           onChangeActiveTool={onChangeActiveTool}
         />

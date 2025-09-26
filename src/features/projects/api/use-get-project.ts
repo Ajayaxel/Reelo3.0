@@ -8,6 +8,12 @@ export interface Project {
   name: string;
   width: number;
   height: number;
+  json: string;
+  userId: string;
+  thumbnailUrl: string | null;
+  isTemplate: boolean;
+  isPro: boolean;
+  createdAt: string;
   updatedAt: string;
 }
 
@@ -24,6 +30,12 @@ export const useGetProject = (id: string) => {
         name: `Project ${id}`,
         width: 1080,
         height: 1350,
+        json: "{}",
+        userId: "local",
+        thumbnailUrl: null,
+        isTemplate: false,
+        isPro: false,
+        createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
       setData(project);
@@ -37,4 +49,8 @@ export const useGetProject = (id: string) => {
   return { data, isLoading, isError };
 };
 
-
+export type ResponseType = {
+  data: Project | null;
+  isLoading?: boolean;
+  isError?: boolean;
+};

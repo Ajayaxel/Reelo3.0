@@ -1,9 +1,6 @@
-import { InferResponseType } from "hono";
 import { useInfiniteQuery } from "@tanstack/react-query";
 
-import { client } from "@/lib/hono";
-
-export type ResponseType = InferResponseType<typeof client.api.projects["$get"], 200>;
+export type ResponseType = any; // Adjust to your API response shape
 
 export const useGetProjects = () => {
   const query = useInfiniteQuery<ResponseType, Error>({
@@ -11,12 +8,9 @@ export const useGetProjects = () => {
     getNextPageParam: (lastPage) => lastPage.nextPage,
     queryKey: ["projects"],
     queryFn: async ({ pageParam }) => {
-      const response = await client.api.projects.$get({
-        query: {
-          page: (pageParam as number).toString(),
-          limit: "5",
-        },
-      });
+      const page = (pageParam as number).toString();
+      const limit = "5";
+      const response = await fetch(`/api/projects?page=${encodeURIComponent(page)}&limit=${encodeURIComponent(limit)}`);
 
       if (!response.ok) {
         throw new Error("Failed to fetch projects");

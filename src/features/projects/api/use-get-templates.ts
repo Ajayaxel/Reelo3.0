@@ -1,10 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 
-import { client } from "@/lib/hono";
-import { InferRequestType, InferResponseType } from "hono";
-
-export type ResponseType = InferResponseType<typeof client.api.projects.templates.$get, 200>;
-type RequestType = InferRequestType<typeof client.api.projects.templates.$get>["query"];
+export type ResponseType = any; // Adjust to your API response shape
+type RequestType = { page: string; limit: string };
 
 export const useGetTemplates = (apiQuery: RequestType) => {
   const query = useQuery({
@@ -16,9 +13,8 @@ export const useGetTemplates = (apiQuery: RequestType) => {
       },
     ],
     queryFn: async () => {
-      const response = await client.api.projects.templates.$get({
-        query: apiQuery,
-      });
+      const params = new URLSearchParams({ page: apiQuery.page, limit: apiQuery.limit });
+      const response = await fetch(`/api/projects/templates?${params.toString()}`);
 
       if (!response.ok) {
         throw new Error("Failed to fetch templates");
